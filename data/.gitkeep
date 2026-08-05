@@ -1,0 +1,4 @@
+# Local data directory
+#
+# Runtime SQLite databases (*.db) are written here and gitignored.
+# They are temporary/local only — nothing is uploaded.

@@ -17,8 +17,8 @@ from src.config import (
     PollIntervalSeconds,
     UIRefreshIntervalMilliseconds,
 )
-from src.db.store import LocalStore
 from src.ecu.speeduino import SpeeduinoClient
+from src.storage.store import LocalStore
 from src.ui.help_content import HelpTopics
 
 
@@ -146,7 +146,7 @@ class AdaptiveTuneApp(CTk.CTk):
             font=CTk.CTkFont(size=21, weight="bold"),
         ).pack(padx=16, pady=(20, 2), anchor="w")
         CTk.CTkLabel(
-            Sidebar, text="Speeduino • offline • local DB",
+            Sidebar, text="Speeduino · ROM tables · NvM · logs",
             text_color="#8e9aaa",
         ).pack(padx=16, pady=(0, 18), anchor="w")
 
@@ -185,7 +185,7 @@ class AdaptiveTuneApp(CTk.CTk):
         )
         self.StatusLabel.pack(padx=16, pady=(14, 10), anchor="w")
         CTk.CTkLabel(
-            Sidebar, text=f"v{AppVersion}  •  data stays local",
+            Sidebar, text=f"v{AppVersion}  •  ECU-style local files",
             text_color="#617080", font=CTk.CTkFont(size=11),
         ).pack(side="bottom", padx=16, pady=16, anchor="w")
 

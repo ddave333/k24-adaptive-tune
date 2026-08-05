@@ -1,4 +1,4 @@
-"""Database package."""
-from src.db.store import LocalStore
+"""Compatibility shim — storage moved to src.storage (no SQLite)."""
+from src.storage.store import LocalStore
 
 __all__ = ["LocalStore"]

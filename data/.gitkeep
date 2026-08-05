@@ -1,4 +1,1 @@
-# Local data directory
-#
-# Runtime SQLite databases (*.db) are written here and gitignored.
-# They are temporary/local only — nothing is uploaded.
+# Local data directory for ECU-style calibration, NvM blocks, logs, and profiles.

@@ -8,8 +8,31 @@ HelpTopics = {
 4. Do not enable learning until coolant is warm and the wideband is calibrated.
 5. Begin with low-load driving. Review corrections before pushing or burning.
 
-The app keeps all sessions, samples, profiles, and learned cells in the local
-data/k24_adaptive.db file. Simulate mode lets you test the interface safely.
+The app stores calibration as CRC-protected lookup tables
+(data/calibration/active.cal), durable learns/sessions as NvM-style binary
+blocks (data/nvm/), and drive samples as append-only binary logs
+(data/logs/). Vehicle profiles are plain JSON. Simulate mode lets you test
+safely with no hardware.
+""",
+    "How Storage Works": """
+This PC agent mirrors ECU practice. It does not use SQLite, DuckDB, or RocksDB.
+
+CALIBRATION (ROM-STYLE TABLES)
+• data/calibration/active.cal — CRC-protected binary axes + VE/Spark/AFR
+• data/calibration/active.h — generated C arrays for inspection / firmware parity
+• Reading a cell is an indexed lookup, the same idea as Speeduino flash tables
+
+DURABLE STATE (NVM-STYLE)
+• data/nvm/cell_learns.bin — per-cell learn accumulators + CRC
+• data/nvm/sessions.bin — session index + CRC
+• Written on Apply / disconnect / shutdown, not on every packet
+
+DRIVE LOGS
+• data/logs/session_NNNN.bin — buffered append-only packed samples
+• Full history remains available for future offline re-learning
+
+Speeduino itself only ever receives raw page bytes over USB serial and burns
+them to its own EEPROM/Flash. Never place a database engine on the MCU.
 """,
     "Connection Troubleshooting": """
 NO COM PORT

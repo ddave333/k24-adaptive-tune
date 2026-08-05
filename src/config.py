@@ -5,9 +5,13 @@ from pathlib import Path
 ProjectRoot = Path(__file__).resolve().parent.parent
 DataDir = ProjectRoot / "data"
 MapsDir = ProjectRoot / "maps"
+CalibrationDir = DataDir / "calibration"
+NvmDir = DataDir / "nvm"
+LogsDir = DataDir / "logs"
+ProfilesDir = DataDir / "profiles"
 
-DataDir.mkdir(parents=True, exist_ok=True)
-MapsDir.mkdir(parents=True, exist_ok=True)
+for Directory in (DataDir, MapsDir, CalibrationDir, NvmDir, LogsDir, ProfilesDir):
+    Directory.mkdir(parents=True, exist_ok=True)
 
 # Speeduino serial defaults (USB to Arduino Mega / compatible)
 DefaultBaudRate = 115200
@@ -35,10 +39,11 @@ DefaultWarmCoolantCelsius = 70.0
 # quickly as it can respond; the GUI renders at a capped rate to avoid lag.
 PollIntervalSeconds = 0.02
 UIRefreshIntervalMilliseconds = 50
+# Append-only log / NvM flush cadence (not per-sample fsync)
 DatabaseFlushIntervalSeconds = 0.50
 DatabaseBatchSize = 50
 ChartHistorySeconds = 20
 ChartMaximumPoints = 400
 
 AppTitle = "K24 Adaptive Tune"
-AppVersion = "0.2.0"
+AppVersion = "0.3.0"

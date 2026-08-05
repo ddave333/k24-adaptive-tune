@@ -231,3 +231,22 @@ class SpeeduinoClient:
         with self.Lock:
             self.SerialPort.write(b"b")
             time.sleep(0.2)
+
+    def WriteCalibrationPages(
+        self,
+        VETable: list[list[float]],
+        SparkTable: list[list[float]],
+        VEPage: int = 0,
+        SparkPage: int = 1,
+    ) -> None:
+        """Push in-memory lookup tables as raw Speeduino page bytes (no JSON/DB)."""
+        self.WriteVETable(VETable, Page=VEPage)
+        self.WriteSparkTable(SparkTable, Page=SparkPage)
+
+    def ReadCalibrationPages(
+        self,
+        VEPage: int = 0,
+        SparkPage: int = 1,
+    ) -> tuple[list[list[float]], list[list[float]]]:
+        """Pull raw Speeduino pages into host-side lookup tables."""
+        return self.ReadVETable(Page=VEPage), self.ReadSparkTable(Page=SparkPage)

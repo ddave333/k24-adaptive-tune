@@ -36,10 +36,10 @@ def Main() -> None:
 
 def RunCLIDemo() -> None:
     from src.agent.learner import AdaptiveTuneAgent
-    from src.db.store import LocalStore
     from src.ecu.speeduino import SpeeduinoClient
+    from src.storage.store import LocalStore
 
-    print("K24 Adaptive Tune — simulated Speeduino learning demo")
+    print("K24 Adaptive Tune - simulated Speeduino learning demo")
     Store = LocalStore()
     Client = SpeeduinoClient(PortName="SIM", Simulate=True)
     Client.Connect()
@@ -63,7 +63,8 @@ def RunCLIDemo() -> None:
     print(
         f"Done. Updated {Summary['CellsUpdated']} cells "
         f"(avg dVE {Summary['AverageDelta']:.2f}). "
-        f"DB: {Store.DBPath}"
+        f"Data: {Store.RootDir} "
+        f"(cal={Store.CalPath.name}, nvm learns/sessions, binary logs)"
     )
 
 

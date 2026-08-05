@@ -3,7 +3,7 @@ Adaptive basemap learning agent.
 
 Collects Speeduino realtime samples, bins them into the VE grid, and
 gradually corrects each cell from wideband AFR error vs the target AFR map.
-Everything stays local in SQLite — the map improves the more you drive.
+Calibration lives as CRC-protected lookup tables; drive history is binary logs.
 """
 from __future__ import annotations
 
@@ -16,19 +16,9 @@ from src.config import (
     DefaultMinSamplesPerCell,
     DefaultWarmCoolantCelsius,
 )
-from src.db.store import LocalStore
 from src.ecu.speeduino import RealtimeData, SpeeduinoClient
-
-
-def NearestBin(Value: float, Bins: list[float]) -> int:
-    BestIndex = 0
-    BestDistance = abs(Value - Bins[0])
-    for Index in range(1, len(Bins)):
-        Distance = abs(Value - Bins[Index])
-        if Distance < BestDistance:
-            BestDistance = Distance
-            BestIndex = Index
-    return BestIndex
+from src.storage.calibration import NearestBin
+from src.storage.store import LocalStore
 
 
 class AdaptiveTuneAgent:
@@ -193,6 +183,7 @@ class AdaptiveTuneAgent:
             SparkTable=self.Basemap["SparkTable"],
             AFRTable=self.Basemap["AFRTable"],
         )
+        self.Store.Flush()
         self.ReloadBasemap()
         self.PendingLearns = 0
         Summary = {
@@ -209,8 +200,10 @@ class AdaptiveTuneAgent:
     def PushBasemapToSpeeduino(self, Burn: bool = False) -> None:
         if not self.Client:
             raise RuntimeError("No Speeduino client attached")
-        self.Client.WriteVETable(self.Basemap["VETable"])
-        self.Client.WriteSparkTable(self.Basemap["SparkTable"])
+        self.Client.WriteCalibrationPages(
+            self.Basemap["VETable"],
+            self.Basemap["SparkTable"],
+        )
         if Burn:
             self.Client.BurnToFlash()
         self.LastStatus = "Basemap pushed to Speeduino" + (" (burned)" if Burn else "")
@@ -218,8 +211,7 @@ class AdaptiveTuneAgent:
     def PullBasemapFromSpeeduino(self) -> None:
         if not self.Client:
             raise RuntimeError("No Speeduino client attached")
-        VETable = self.Client.ReadVETable()
-        SparkTable = self.Client.ReadSparkTable()
+        VETable, SparkTable = self.Client.ReadCalibrationPages()
         self.Store.SaveBasemapTables(
             BasemapID=self.Basemap["BasemapID"],
             VETable=VETable,
@@ -230,8 +222,8 @@ class AdaptiveTuneAgent:
         self.LastStatus = "Basemap pulled from Speeduino"
 
     def GetDashboard(self) -> dict[str, Any]:
-        # Database statistics are intentionally refreshed at 1 Hz. Live
-        # gauges read in-memory values and can repaint much faster.
+        # Learn statistics refresh at 1 Hz from in-RAM NvM accumulators.
+        # Live gauges read LastRealtime and can repaint much faster.
         Now = time.monotonic()
         if Now - self.LastStatsRefreshAt >= 1.0:
             Learns = self.Store.GetCellLearns(self.Basemap["BasemapID"])
